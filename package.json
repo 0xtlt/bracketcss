@@ -1,0 +1,19 @@
+{
+  "name": "bracketcss",
+  "version": "0.1.0",
+  "description": "BracketCSS is not like LESS or SASS with functions, it is design for web responsive with variables and media queries",
+  "main": "bracketcss.js",
+  "scripts": {
+    "test": "node ./bracketcss.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThomasT404/bracketcss.git"
+  },
+  "author": "Thomas Tastet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThomasT404/bracketcss/issues"
+  },
+  "homepage": "https://github.com/ThomasT404/bracketcss#readme"
+}

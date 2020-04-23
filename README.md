@@ -38,6 +38,10 @@ This (BracketCSS) :
     p {
         color: [red, green, blue];
         content: "\n";
+        
+        strong {
+          font-weight: bold;
+        }   
     }
 }
 ```

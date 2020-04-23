@@ -1,3 +1,6 @@
+## 0.3.1
+- edit : README.md update
+
 ## 0.3.0
 - add : support element in element (V2Block Engine)
 - bug fixed : @import was not included in the compilation

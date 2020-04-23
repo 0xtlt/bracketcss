@@ -1,6 +1,6 @@
 {
   "name": "bracketcss",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "BracketCSS is not like LESS or SASS with functions, it is design for web responsive with variables and media queries",
   "main": "bracketcss.js",
   "scripts": {

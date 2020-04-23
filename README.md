@@ -48,5 +48,5 @@ This (BracketCSS) :
 
 Become (CSS) :
 ```css
-@media screen and (max-width: 1920px){p{color: red;content: "\n";}}@media screen and (max-width: 1024px){p{color: green;content: "\n";}}@media screen and (max-width: 778px){p{color: blue;content: "\n";}}
+@media screen and (max-width: 1920px){p strong{font-weight: bold;}p{color: red;content: "\n";}}@media screen and (max-width: 1024px){p strong{font-weight: bold;}p{color: green;content: "\n";}}@media screen and (max-width: 778px){p strong{font-weight: bold;}p{color: blue;content: "\n";}}
 ```

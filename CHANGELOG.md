@@ -1,3 +1,6 @@
+## 0.3.3
+- edit : package.json keywords
+
 ## 0.3.1 && 0.3.2
 - edit : README.md update
 

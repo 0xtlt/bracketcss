@@ -1,18 +1,19 @@
 $size: 12px;
 
 p {
-    color: blue;
-}
+    font-size: ${size};
 
-@media screen and max-width: [1920px, 1024px, 778px] {
-    p {
-        color: [red, green, blue];
-        content: "\n";
+    strong {
+        font-weight: bold;
     }
 }
 
-@media screen and max-width: [18px, 14px] {
-    h1 {
-        font-size: [${size}, 2em];
+@media screen and max-width: [1024px, 778px] {
+    p {
+        font-size: [14px, 15px];
+
+        strong {
+            color: [blue, green];
+        }
     }
 }

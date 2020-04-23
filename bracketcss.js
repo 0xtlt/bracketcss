@@ -1,8 +1,9 @@
 function bracketcss(code) {
+    let errors = [];
     let variables = {};
     let transpiled_css = "";
 
-    let lines = code.split("\n").map(line => line.trim()).filter(line => line.length !== 0);
+    let lines = code.split("\n").map(line => line.trim());
 
     let mediaQuery = false;
     let cssQuery = [];
@@ -24,7 +25,14 @@ function bracketcss(code) {
         //replace variable
         line = line.replace(/\${(([a-zA-Z0-9_-])+)}/g, content => {
             let tmp = /\${(([a-zA-Z0-9_-])+)}/.exec(content);
-            return variables[tmp[1]];
+
+            if(!variables[tmp[1]]) {
+                let error = `error at line : ${n}, variable "${tmp[1]}" is not defined`;
+                errors.push(error);
+                return error;
+            } else {
+                return variables[tmp[1]];
+            }
         })
 
         if(mediaQuery) {
@@ -63,7 +71,14 @@ function bracketcss(code) {
     
     transpiled_css = transpiled_css.replace(/\$(([a-zA-Z0-9_-])+):(.*);/g, "").replace(/\n/g, "").trim();
 
-    return transpiled_css;
+    if(errors.length) {
+        console.error(`${errors.length} error${errors.length === 1 ? "" : "s"} have been detected :`);
+        errors.forEach(error => {
+            console.error(error);
+        })
+    }
+
+    return errors.length ? errors : transpiled_css;
 }
 
 //The block function is used to make the media queries using bracketcss

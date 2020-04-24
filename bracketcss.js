@@ -76,8 +76,8 @@ function bracketcss(code) {
 
                     if(brackets === 0) {
                         if(cssBlock.filter(line => line.length).length){
-                            transpiled_css += make(wrapperBlock(cssBlock));
-                            transpiled_css += makeGlobalChild();
+                            let importAfterGlobal = make(wrapperBlock(cssBlock));
+                            transpiled_css += makeGlobalChild() + importAfterGlobal;
                         }
 
                         cssBlock = [];
@@ -203,7 +203,7 @@ function v2Block(code = [], breakpoints = [], type = "max") {
     Object.keys(globalChild).forEach(key => {
         globalChild[key].children = {};
 
-        firstStep = [...firstStep, ...makeChild(globalChild, null, true)];
+        firstStep = [...makeChild(globalChild, null, true), ...firstStep];
     });
 
     firstStep = firstStep.flat(Infinity);

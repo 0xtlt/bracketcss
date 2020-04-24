@@ -1,3 +1,6 @@
+## 0.3.4
+- edit : better priority management
+
 ## 0.3.3
 - edit : package.json keywords
 

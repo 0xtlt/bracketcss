@@ -1,3 +1,7 @@
+## 0.4.1
+
+- bug fixed : native css functions like `calc` was executed in javascript, now fixed
+
 ## 0.4.0 : Functions
 
 - add : javascript functions

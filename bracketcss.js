@@ -4,6 +4,7 @@ const context = {
 };
 vm.createContext(context);
 let globalChild = {};
+let functions = [];
 
 /**
  * @param {string} bracketcss 
@@ -45,6 +46,9 @@ function bracketcss(code = "") {
 
         if (line.substr(0, 3) === "fnc") {
             logFunction = line.replace('fnc', 'function');
+
+            functions.push(/(([a-zA-Z_0-9])+)/.exec(logFunction.replace('function ', ''))[1]);
+
             bracketFunction = 1;
         }
 
@@ -341,9 +345,12 @@ function lineFunctions(line = "") {
 
             //execute in VM
             if (prepared) {
+                if (functions.includes(/(([a-zA-Z_0-9])+)/.exec(toCompute)[1])) {
+                    vm.runInContext(`result = ${toCompute}`, context);
+                    line = line.replace(toCompute, context.result)
+                }
+
                 prepared = false;
-                vm.runInContext(`result = ${toCompute}`, context);
-                line = line.replace(toCompute, context.result)
                 toCompute = "";
             }
         }

@@ -1,6 +1,6 @@
 {
   "name": "bracketcss",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "BracketCSS is designed for web responsive with variables, media queries and now functions !",
   "main": "bracketcss.js",
   "scripts": {

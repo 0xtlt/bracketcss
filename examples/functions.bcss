@@ -1,0 +1,35 @@
+fnc componentToHex(c) {
+  let hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+fnc rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+fnc red() {
+    return "red";
+}
+
+fnc blue() {
+    return "blue";
+}
+
+$size: 12px;
+$red: 255;
+
+p {
+    font-size: ${size};
+    color: rgbToHex(${red}, 10, 35);
+}
+
+@media screen and max-width: [1024px, 778px] {
+    p {
+        font-size: [14px, 15px];
+        color: [red(), blue()];
+
+        strong {
+            color: [rgbToHex(${red}, 10, 35), rgbToHex(${red}, 250, 35)];
+        }
+    }
+}

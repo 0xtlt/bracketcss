@@ -1,3 +1,8 @@
+## 0.5.0
+
+- edit : you can directly use the function with hexadecimal color or rgb(a) like : `lighten(#edff23, 20)` instead of : `lighten("#edff23", 20)`
+- add : pre-built css functions `hexToRGB(hex)`, `opacify(hex, opacity)`, `lighten(colorCode, amount)`
+
 ## 0.4.1
 
 - bug fixed : native css functions like `calc` was executed in javascript, now fixed

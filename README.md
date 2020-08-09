@@ -118,3 +118,33 @@ p {
     }
 }
 ```
+
+## Pre-Built functions
+
+Lighten
+hex, percent (0 - 100)
+
+```scss
+color: lighten(#21eae3, 20);
+```
+
+Darken
+hex, percent (0 - 100)
+
+```scss
+color: darken(#21eae3, 20);
+```
+
+Opacify
+hex, percent (0 - 1)
+
+```scss
+color: opacify(#21eae3, 0.2);
+```
+
+Hex To RGB
+hex
+
+```scss
+color: hexToRGB(#21eae3);
+```

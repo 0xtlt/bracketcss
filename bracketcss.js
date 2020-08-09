@@ -1,13 +1,83 @@
-const vm = require('vm');
+const vm = require("vm");
 const context = {
-    result: null
+    result: null,
 };
 vm.createContext(context);
 let globalChild = {};
-let functions = [];
+let functions = ["hexToRGB", "opacify", "darken", "lighten"];
+
+vm.runInContext(
+    `
+function hexToRGB(hex){
+    if(hex.length != 6){
+        throw "Only six-digit hex colors are allowed.";
+    }
+
+    let aRgbHex = hex.match(/.{1,2}/g);
+    let aRgb = [
+        parseInt(aRgbHex[0], 16),
+        parseInt(aRgbHex[1], 16),
+        parseInt(aRgbHex[2], 16)
+    ];
+    return aRgb;
+}
+
+function opacify(hex, opacity) {
+    if(hex[0] === "#") {
+        hex = hex.substr(1);
+    }
+
+    let rgb = hexToRGB(hex);
+
+    return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + opacity + ")";
+}
+
+function lighten(colorCode, amount) {
+    let usePound = false;
+ 
+    if (colorCode[0] == "#") {
+        colorCode = colorCode.slice(1);
+        usePound = true;
+    }
+ 
+    let num = parseInt(colorCode, 16);
+ 
+    var r = (num >> 16) + amount;
+ 
+    if (r > 255) {
+        r = 255;
+    } else if (r < 0) {
+        r = 0;
+    }
+ 
+    var b = ((num >> 8) & 0x00FF) + amount;
+ 
+    if (b > 255) {
+        b = 255;
+    } else if (b < 0) {
+        b = 0;
+    }
+ 
+    var g = (num & 0x0000FF) + amount;
+ 
+    if (g > 255) {
+        g = 255;
+    } else if (g < 0) {
+        g = 0;
+    }
+ 
+    return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+}
+
+function darken(colorCode, amount) {
+    return lighten(colorCode,-amount);
+}
+`,
+    context
+);
 
 /**
- * @param {string} bracketcss 
+ * @param {string} bracketcss
  * @returns {string|object} css | error
  */
 function bracketcss(code = "") {
@@ -19,7 +89,7 @@ function bracketcss(code = "") {
 
     let transpiled_css = "";
 
-    let lines = code.split("\n").map(line => line.trim());
+    let lines = code.split("\n").map((line) => line.trim());
 
     let mediaQuery = false;
     let mediaQueryBracketLevel = 0;
@@ -45,9 +115,11 @@ function bracketcss(code = "") {
         }
 
         if (line.substr(0, 3) === "fnc") {
-            logFunction = line.replace('fnc', 'function');
+            logFunction = line.replace("fnc", "function");
 
-            functions.push(/(([a-zA-Z_0-9])+)/.exec(logFunction.replace('function ', ''))[1]);
+            functions.push(
+                /(([a-zA-Z_0-9])+)/.exec(logFunction.replace("function ", ""))[1]
+            );
 
             bracketFunction = 1;
         }
@@ -61,7 +133,7 @@ function bracketcss(code = "") {
 
         //replace variable
         if (!logFunction) {
-            line = line.replace(/\${(([a-zA-Z0-9_-])+)}/g, content => {
+            line = line.replace(/\${(([a-zA-Z0-9_-])+)}/g, (content) => {
                 let tmp = /\${(([a-zA-Z0-9_-])+)}/.exec(content);
 
                 if (!variables[tmp[1]]) {
@@ -106,7 +178,9 @@ function bracketcss(code = "") {
             } else {
                 if (line.toLowerCase().includes("@media screen and")) {
                     mediaQueryBracketLevel = brackets;
-                    const tmp = /@media screen and \(?(([a-zA-Z0-9-])+):( )?\[(([a-zA-Z0-9, ])+)\]/.exec(line.toLowerCase());
+                    const tmp = /@media screen and \(?(([a-zA-Z0-9-])+):( )?\[(([a-zA-Z0-9, ])+)\]/.exec(
+                        line.toLowerCase()
+                    );
 
                     typeBreak = tmp[1];
                     breakPoints = tmp[4].replace(/ /g, "").split(",");
@@ -116,7 +190,7 @@ function bracketcss(code = "") {
                     cssBlock.push(line);
 
                     if (brackets === 0) {
-                        if (cssBlock.filter(line => line.length).length) {
+                        if (cssBlock.filter((line) => line.length).length) {
                             let importAfterGlobal = make(wrapperBlock(cssBlock));
                             transpiled_css += makeGlobalChild() + importAfterGlobal;
                         }
@@ -132,13 +206,20 @@ function bracketcss(code = "") {
         }
     }
 
-    transpiled_css = transpiled_css.replace(/\$(([a-zA-Z0-9_-])+):(.*);/g, "").replace(/\n/g, "").trim();
+    transpiled_css = transpiled_css
+        .replace(/\$(([a-zA-Z0-9_-])+):(.*);/g, "")
+        .replace(/\n/g, "")
+        .trim();
 
     if (errors.length) {
-        console.error(`${errors.length} error${errors.length === 1 ? "" : "s"} have been detected :`);
-        errors.forEach(error => {
+        console.error(
+            `${errors.length} error${
+        errors.length === 1 ? "" : "s"
+      } have been detected :`
+        );
+        errors.forEach((error) => {
             console.error(error);
-        })
+        });
     }
 
     return errors.length ? errors : transpiled_css;
@@ -146,21 +227,35 @@ function bracketcss(code = "") {
 
 function makeChild(child, prefix = null, withBlocks = false) {
     if (withBlocks) {
-        return Object.keys(child).map(key => {
+        return Object.keys(child).map((key) => {
             if (Object.keys(child[key].children).length) {
-                globalChild[`${prefix ? prefix + " "+ key : key}`] = child[key];
-                return makeChild(child[key].children, prefix ? prefix + " " + key : key, withBlocks);
+                globalChild[`${prefix ? prefix + " " + key : key}`] = child[key];
+                return makeChild(
+                    child[key].children,
+                    prefix ? prefix + " " + key : key,
+                    withBlocks
+                );
             } else {
-                return [`${prefix ? prefix + " "+ key : key}{`, ...child[key].code, `}`];
+                return [
+                    `${prefix ? prefix + " " + key : key}{`,
+                    ...child[key].code,
+                    `}`,
+                ];
             }
         });
     } else {
-        return Object.keys(child).map(key => {
+        return Object.keys(child).map((key) => {
             if (Object.keys(child[key].children).length) {
-                globalChild[`${prefix ? prefix + " "+ key : key}`] = child[key];
-                return makeChild(child[key].children, prefix ? prefix + " " + key : key, withBlocks);
+                globalChild[`${prefix ? prefix + " " + key : key}`] = child[key];
+                return makeChild(
+                    child[key].children,
+                    prefix ? prefix + " " + key : key,
+                    withBlocks
+                );
             } else {
-                return `${prefix ? prefix + " "+ key : key}{${child[key].code.join("")}}`;
+                return `${prefix ? prefix + " " + key : key}{${child[key].code.join(
+          ""
+        )}}`;
             }
         });
     }
@@ -168,7 +263,7 @@ function makeChild(child, prefix = null, withBlocks = false) {
 
 function makeGlobalChild() {
     let tmp = [];
-    Object.keys(globalChild).forEach(key => {
+    Object.keys(globalChild).forEach((key) => {
         globalChild[key].children = {};
 
         tmp = [...tmp, ...makeChild(globalChild, null, true)];
@@ -198,8 +293,8 @@ function make(object, withBlocks = false) {
 function wrapperBlock(code) {
     let style = {
         main: {
-            children: {}
-        }
+            children: {},
+        },
     };
     let cssPath = [];
 
@@ -221,15 +316,15 @@ function wrapperBlock(code) {
                     if (!exist) {
                         el.children[element] = {
                             children: {},
-                            code: []
-                        }
+                            code: [],
+                        };
                     }
 
                     refCode = el.children[element].code;
 
                     el = el.children[element];
                 }
-            })
+            });
         } else if (line[line.length - 1] === "}") {
             cssPath.splice(cssPath.length - 1, 1);
         } else {
@@ -246,7 +341,7 @@ function v2Block(code = [], breakpoints = [], type = "max") {
     // ---> first the global treatment with the new method
     let firstStep = make(wrapperBlock(code), true);
 
-    Object.keys(globalChild).forEach(key => {
+    Object.keys(globalChild).forEach((key) => {
         globalChild[key].children = {};
 
         firstStep = [...makeChild(globalChild, null, true), ...firstStep];
@@ -263,34 +358,48 @@ function v2Block(code = [], breakpoints = [], type = "max") {
 //The block function is used to make the media queries using bracketcss
 function block(code = [], breakpoints = [], type = "max") {
     let style = {};
-    breakpoints.forEach(bp => style[bp] = {});
+    breakpoints.forEach((bp) => (style[bp] = {}));
     const eq = {
-        ...breakpoints
+        ...breakpoints,
     };
 
-    let objectData = null
+    let objectData = null;
 
     for (let n = 0; n < code.length; n++) {
         let line = code[n].trim();
 
         if (line[line.length - 1] === "{") {
             objectData = line.substr(0, line.length - 1).trim();
-            breakpoints.forEach(bp => style[bp][objectData] ? "" : style[bp][objectData] = []);
+            breakpoints.forEach((bp) =>
+                style[bp][objectData] ? "" : (style[bp][objectData] = [])
+            );
         } else if (line[line.length - 1] === "}") {
             objectData = null;
         } else if (objectData) {
             let property = /(.*):( )?(.*)/.exec(line.trim());
 
             if (property[3][0] !== "[") {
-                breakpoints.forEach(bp => style[bp][objectData].includes(line) ? "" : style[bp][objectData].push(line));
+                breakpoints.forEach((bp) =>
+                    style[bp][objectData].includes(line) ?
+                    "" :
+                    style[bp][objectData].push(line)
+                );
             } else {
-                let values = property[3].substr(1)
-                values = values.substr(0, values.includes(";") ? values.length - 2 : values.length - 1).split(",").map(value => value.trim());
+                let values = property[3].substr(1);
+                values = values
+                    .substr(
+                        0,
+                        values.includes(";") ? values.length - 2 : values.length - 1
+                    )
+                    .split(",")
+                    .map((value) => value.trim());
                 values.forEach((value, index) => {
-                    if (!style[eq[index]][objectData].includes(`${property[1]}: ${value};`)) {
+                    if (
+                        !style[eq[index]][objectData].includes(`${property[1]}: ${value};`)
+                    ) {
                         style[eq[index]][objectData].push(`${property[1]}: ${value};`);
                     }
-                })
+                });
             }
         }
     }
@@ -299,9 +408,11 @@ function block(code = [], breakpoints = [], type = "max") {
 
     let style_css = "";
 
-    breakpoints.forEach(bp => {
+    breakpoints.forEach((bp) => {
         style_css += `@media screen and (${type}: ${bp}){`;
-        style_css += `${Object.keys(style[bp]).map(object => `${object}{${style[bp][object].join("")}}`).join("")}`;
+        style_css += `${Object.keys(style[bp])
+      .map((object) => `${object}{${style[bp][object].join("")}}`)
+      .join("")}`;
         style_css += `}`;
     });
 
@@ -310,14 +421,14 @@ function block(code = [], breakpoints = [], type = "max") {
 
 /**
  * lineFunctions will convert every functions into his result
- * @param {string} line 
+ * @param {string} line
  * @returns {string} line
  */
 function lineFunctions(line = "") {
     line = line.trim();
     let elements = line.split("");
     let tab = 0;
-    let toCompute = '';
+    let toCompute = "";
     let prepared = false;
     let valid = false;
 
@@ -330,9 +441,9 @@ function lineFunctions(line = "") {
         }
 
         if (valid) {
-            if (char === '(') {
+            if (char === "(") {
                 tab++;
-            } else if (char === ')') {
+            } else if (char === ")") {
                 tab--;
 
                 if (!tab) {
@@ -346,8 +457,15 @@ function lineFunctions(line = "") {
             //execute in VM
             if (prepared) {
                 if (functions.includes(/(([a-zA-Z_0-9])+)/.exec(toCompute)[1])) {
-                    vm.runInContext(`result = ${toCompute}`, context);
-                    line = line.replace(toCompute, context.result)
+                    vm.runInContext(`result = ${toCompute.replace(/\((.*)\)/, '')}(${/\((.*)\)/.exec(toCompute)[1].split(',').map(t => {
+                        let tmp = t.trim();
+                        if (tmp[0] === '#' || tmp.substr(3) === 'rgb') {
+                            return `"${tmp}"`
+                        } else {
+                            return tmp;
+                        }
+                    }).join(',')})`, context);
+                    line = line.replace(toCompute, context.result);
                 }
 
                 prepared = false;
